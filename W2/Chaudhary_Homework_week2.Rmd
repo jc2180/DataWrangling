@@ -1,0 +1,89 @@
+---
+title: "Chaudhary_week_02"
+author: "Jyoti Chaudhary"
+date: "September 25, 2016"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gapminder)
+```
+## PROBLEM 1
+
+## Create a DataFrame mydata2 and load the dataset using read.csv
+
+```{r warning = FALSE}
+
+mydata2 <- read.csv(paste(getwd(),"/DOHMH_New_York_City_Restaurant_Inspection_Results.csv",sep = ""),header=T)
+# mydata2 <- read.csv("https://nycopendata.socrata.com/api/views/xx67-kt59/rows.csv?accessType=DOWNLOAD", header=TRUE, sep=",")
+```
+
+## Create another dataframe BROOKDF from mydata2 with restaurants = Brooklyn and with cuisine equal to "Ice Cream, Gelato, Yogurt, Ices". 
+
+
+```{r }
+BROOKDF <- data.frame(filter(mydata2, BORO == "BROOKLYN" & CUISINE.DESCRIPTION %in% c("Ice Cream, Gelato, Yogurt, Ices")))
+```
+
+## 5 common restaurant names in BROOKDF dataframe
+## The most common will be listed at the top in descending order
+```{r }
+by_DBA <- group_by(BROOKDF, DBA)
+COMMONNAMES <- arrange((summarise(by_DBA, count = n())),desc(count))
+```
+
+## What grades has Brooklyn ice cream store "SWEET EXPRESSIONS" received and how often? 
+
+## Using PIPES (Total 15 Grades received. Grade A count is 11. Grade B count is 6.)
+```{r }
+EXGRADE <-mydata2%>%
+  filter(BORO == "BROOKLYN" & CUISINE.DESCRIPTION %in% c("Ice Cream, Gelato, Yogurt, Ices") & DBA == "SWEET EXPRESSIONS" & GRADE !="NA")%>%
+  group_by(GRADE)%>%
+  summarise(n=n())%>%
+  arrange(desc(n))
+```
+## Grades received by "SWEET EXPRESSIONS" Using TABLE command. (Total Grades = 15. Grade A = 15. Grade B=6. Grade C, P, Z = 0)
+```{r }
+J1 <- filter(mydata2, BORO == "BROOKLYN" & CUISINE.DESCRIPTION %in% c("Ice Cream, Gelato, Yogurt, Ices") & DBA == "SWEET EXPRESSIONS" & GRADE !="NA")
+with(J1, table(GRADE))
+```
+## PROBLEM2
+
+## Read "gapminder_2007_gini.tsv" in R and draw an interesting plot
+## Generate a data frame showing, for each continent, the minimum, maximum, and average Gini coefficient. (The output dataframe lists data under column names Max, Min & Mean).
+
+```{r }
+mydata3 <- read_tsv("gapminder_2007_gini.tsv")
+ggplot(data = filter(mydata3),  aes(gdpPercap, lifeExp)) + geom_point(aes(gdpPercap, lifeExp, colour = continent, size = pop)) + geom_smooth()
+by_continent <- group_by(mydata3, continent)
+print(summarize(by_continent, Max = max(gini, na.rm = TRUE), Min = min(gini, na.rm = TRUE), Mean = mean(gini, na.rm = TRUE)))
+```
+
+
+## PROBLEM3
+
+## Add a new column gdp to the GAPMINDER dataframe. 
+
+```{r }
+gapminder$gdp <- gapminder$gdpPercap * gapminder$pop
+glimpse(gapminder)
+```
+
+## To add an additional new variable called gdp_ratio equal to the gdp divided by the gdp of the United States in 2007.
+
+```{r }
+USAGDP <- filter(gapminder,year==2007 & country=="United States")
+gapminder$gdpratio <- gapminder$gdp / USAGDP$gdp
+```
+
+## Find the mean gdp_ratio by continent and year, and then plot the mean gdp_ratio over time, distinguishing the continents. Please use both points and lines for the plot.
+
+```{r }
+by_continent_year <- group_by(gapminder, continent, year)
+xy<- (summarize(by_continent_year, gdpratiomean = mean(gdpratio, na.rm = TRUE)))
+ggplot(data= xy, aes(year, xy$gdpratiomean)) + geom_point(aes(year, xy$gdpratiomean, colour = continent)) + geom_line(aes(year, xy$gdpratiomean, colour = continent))
+```

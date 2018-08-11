@@ -1,0 +1,276 @@
+---
+title: "Untitled"
+author: "Jyoti Chaudhary"
+date: "October 25, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1
+1) We would like to visually compare first names of baseball players with those of 
+   male babies in the population at large. This will require several steps.
+
+```{r library, echo=FALSE}
+
+library(tidyverse)
+library(dplyr)
+library(Lahman)
+library(babynames)
+library(stringr)
+library(curl)
+library(purrr)
+
+```
+
+a) Create a data frame of players who played at least 200 games in their career 
+   according to the Fielding data frame. You'll have to group by player id, sum 
+   over the variable G, filter, and then do some sort of join with the Master data frame.
+   
+```{r Lahman}
+Players_200 <- Fielding %>% group_by(playerID) %>%
+               mutate(Gsum = sum(G)) %>%
+                filter(Gsum >= 200) %>%
+            left_join(Master, by=c('playerID'))
+
+head(Players_200, 10)
+
+```
+
+b) Create a data frame similar to the babynames, but based on your data frame in (a). 
+   Use the variables nameFirst and birthYear.
+
+```{r }
+Players_200_prop <- Players_200 %>% 
+  group_by(birthYear) %>%
+  mutate(nprop = n())
+
+babyname_df <- Players_200_prop %>% 
+              group_by(nameFirst, birthYear) %>%
+              mutate(n = n(), prop = n/nprop, sex = "M" ) %>% 
+              select(birthYear, sex, nameFirst, n, prop)
+
+head(babyname_df)
+
+```
+
+c) Combine the babynames data frame, restricted to male babies, and the one that you 
+   created in (b).
+
+
+```{r }
+filter(babynames, sex == "M") %>%
+inner_join(babyname_df, by = c("name" = "nameFirst"))
+```
+
+d) Determine the 5 most popular names for male babies from the babynames dataset and 
+   the 5 most popular names for baseball players, based on your dataset in (b).
+   Do this by pooling all the names from 1890 to 1990---that is, find 10 names total, not 10 
+   names per year. The total might actually be less than 10 if there is overlap in the names.
+
+```{r }
+popular_babynames <- filter(babynames, year >= "1890" & year <= "1990") %>%
+                      group_by(name) %>%
+                      mutate(n1=sum(n)) %>%
+                      select(name, n1) %>%
+                      arrange(desc(n1))
+
+popular_babynames5 <- unique(popular_babynames) 
+
+## Popular babynames
+head(popular_babynames5, 5)
+
+
+popular_baseball <- filter(babyname_df, birthYear >= "1890" & birthYear <= "1990") %>%
+  group_by(nameFirst) %>%
+  mutate(n1=sum(n)) %>%
+  select(nameFirst, n1) %>%
+  arrange(desc(n1)) 
+
+popular_baseball5 <- unique(popular_baseball)
+
+## Popular baseball player names
+head(popular_baseball5, 5)
+
+```
+
+e) If you plot a name in the general population (i.e., from babynames) against baseball 
+   player names, the difference in scale will make it hard to interpret. For both 
+   general population and baseball names, create a new variables for each: the proportion 
+   of all names from that year equal to that name (e.g., if 2% of all babies in 1961 
+   were names "Steven", this new variable would equal 0.02 for Steven for 1961).
+
+```{r }
+
+popular_babynames_year <- filter(babynames, sex == "M") %>%
+                          group_by(year) %>%
+                        mutate(year_sum = sum(n))
+popular_babynames_year_name <- group_by(popular_babynames_year, year, name) %>%
+             mutate(name_sum = sum(n), prop_name_year = name_sum/year_sum)
+
+head(popular_babynames_year_name)
+
+
+popular_baseball_year <- group_by(babyname_df, birthYear) %>%
+                        mutate(year_sum = sum(n))
+popular_baseball_year_name <- group_by(popular_baseball_year, birthYear, nameFirst) %>%
+             mutate(name_sum = sum(n), prop_name_year = name_sum/year_sum)
+
+head(popular_baseball_year_name)
+
+```
+
+f) For each of the names you determined in (d), plot the relative popularity, using 
+   the variable you created in (e). Each figure should have different colors for 
+   general population names and for baseball player names. The horizontal axis should 
+   be year of birth, from 1890 to 1990.
+
+## GENERAL POPULATION NAMES
+
+```{r}
+
+ggplot(data = filter(popular_babynames_year_name, sex == "M", year >=1890 & year <=1990,
+                                  name == "James" |
+                                  name == "John" |
+                                  name == "Robert" |
+                                  name =="Mary"|
+                                  name == "Michael")) + 
+                                  geom_point(aes(year,prop_name_year, colour = name))
+
+```
+
+##BASEBALL PLAYER NAMES
+
+```{r}
+
+ggplot(data = filter(popular_baseball_year_name, birthYear >=1890 & birthYear <=1990,
+                                  nameFirst == "Mike" |
+                                  nameFirst == "Jim" |
+                                  nameFirst == "Dave" |
+                                  nameFirst =="John"|
+                                  nameFirst == "Jerry")) + 
+                                  geom_point(aes(birthYear,prop_name_year, colour = nameFirst))
+
+```
+
+## Problem 2
+The join in Week 3's third homework likely missed some entries because of differences in how the phone numbers were formatted. Reformat the phone numbers in the two data sets to a common format (your choice) and then repeat your analysis from last week.
+   
+   
+```{r restaurant, echo=FALSE, message = FALSE}
+library(plyr)
+restaurant <- read_csv("DOHMH_New_York_City_Restaurant_Inspection_Results.csv")
+names(restaurant) <- make.names(names(restaurant))
+restaurant.gp <- group_by(restaurant, DBA, INSPECTION.DATE)
+restaurant.gp <- mutate(restaurant.gp, mean_score = mean(SCORE))
+### below code removes '-' in phone numbers
+restaurant.gp$PHONE <- gsub('-','',restaurant.gp$PHONE)
+restaurant.subset <- select(restaurant.gp, DBA, INSPECTION.DATE)
+restaurant.subset <- ddply(restaurant.subset,"DBA", summarise, INSPECTION.DATE = max(INSPECTION.DATE))
+
+restaurant.maxinspection <- inner_join(restaurant.subset, restaurant.gp, by= c("DBA", "INSPECTION.DATE"))
+
+restaurant_final <- select(restaurant.maxinspection, DBA, INSPECTION.DATE, BORO, BUILDING,STREET, ZIPCODE, 
+               PHONE, SCORE)
+restaurant_final <- unique(restaurant_final)
+
+
+legal_business <- read_csv("Legally_Operating_Businesses.csv")
+
+
+names(legal_business) <- make.names(names(legal_business))
+restaurant_final <- group_by(restaurant_final, PHONE)
+### below code removes '-' in phone numbers
+legal_business$Contact.Phone.Number <- gsub('-','',legal_business$Contact.Phone.Number)
+Legal_match <- inner_join(restaurant_final, legal_business, by=c("PHONE" = "Contact.Phone.Number"))
+
+```
+
+```{r echo=TRUE, message = FALSE}
+# Joined data frame of restaurant health inspection dataset and Legal business dataset. Join on contact phone number.
+head(Legal_match, 10)
+
+# Top 10 Licence categories
+head(sort(table(Legal_match$License.Category),decreasing = TRUE), 10)
+```
+
+
+## Problem 3
+3) Read the post at http://www.sumsar.net/blog/2016/09/whats-on-the-menu/ and follow the steps yourself. 
+(Please include the R code in the RMarkdown file up through the creation of the data frame "d"---a terrible name, by the way.)
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+menu_data_url <- "https://s3.amazonaws.com/menusdata.nypl.org/gzips/2016_10_16_07_00_30_data.tgz"
+temp_dir <- tempdir()
+curl_download(menu_data_url, file.path(temp_dir, "menu_data.tgz"))
+untar(file.path(temp_dir, "menu_data.tgz"), exdir = temp_dir)
+dish <- read_csv(file.path(temp_dir, "Dish.csv"))
+menu <- read_csv(file.path(temp_dir, "Menu.csv"))
+menu_item <- read_csv(file.path(temp_dir, "MenuItem.csv"))
+menu_page <- read_csv(file.path(temp_dir, "MenuPage.csv"))
+
+d <- menu_item %>% select( id, menu_page_id, dish_id, price) %>%
+  left_join(dish %>% select(id, name) %>% dplyr::rename(dish_name = name),
+            by = c("dish_id" = "id")) %>%
+  left_join(menu_page %>% select(id, menu_id),
+            by = c("menu_page_id" = "id")) %>%
+  left_join(menu %>% select(id, date, place, location),
+            by = c("menu_id" = "id")) %>%
+  mutate(year = lubridate::year(date)) %>%
+  filter(!is.na(year)) %>%
+  filter(year > 1800 & year <= 2016) %>%
+  select(year, location, menu_id, dish_name, price, place)
+
+head(d,10)
+
+```
+
+## Interesting observation 1 
+MASHED POTATOES were more common and presumably more popular food item in comparison to BROWNED POTATOES and GERMAN FRIED POTATOES. 
+
+
+```{r ECHO=FALSE, message=FALSE}
+
+d$decennium = floor(d$year / 10) * 10
+
+foods <- c("coffee", "tea", "pancake", "ice cream", "french frie",
+           "french peas", "apple", "banana", "strawberry", "Mashed potatoes", "BROWNED POTATOES", "German fried potatoes")
+
+food_over_time <- map_df(foods, function(food) {
+  d %>%
+    filter(d$year >= 1900 & d$year <= 1980) %>%
+    group_by(decennium, menu_id)  %>%
+    summarise(contains_food =
+                any(str_detect(dish_name, regex(paste0("\\b", food), ignore_case = TRUE)),
+                    na.rm = TRUE))  %>%
+    summarise(prop_food = mean(contains_food, na.rm = TRUE)) %>%
+    mutate(food = food)
+})
+
+food_time_plot <- list(
+  geom_line(),
+  geom_point(),
+  scale_y_continuous("% of menus include",labels = scales::percent,
+                     limits = c(0, NA)),
+  scale_x_continuous(""),
+  facet_wrap(~ food),
+  theme_minimal(),
+  theme(legend.position = "none"))
+
+
+# Could not generate the plot out of below code. Getting error - "Aesthetics must be either length 1 or the same as the data". Tried to fix the issue, but could not resolve.
+
+#food_over_time %>% filter(food %in% c("Mashed potatoes", "BROWNED POTATOES", "German fried potatoes")) %>%
+#  ggplot(aes(d$decennium, prop_food, color = food)) + food_time_plot
+
+
+
+
+
+```

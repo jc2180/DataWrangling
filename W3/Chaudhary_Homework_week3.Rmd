@@ -1,0 +1,153 @@
+---
+title: "Chaudhary_week_03"
+author: "Jyoti Chaudhary"
+date: "October 2, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(babynames)
+library(Lahman)
+restaurant.df <- read_csv("DOHMH_New_York_City_Restaurant_Inspection_Results.csv")
+legal <- read_csv("Legally_Operating_Businesses.csv")
+```
+
+
+a) Create a data frame of players who played at least 200 games in their career according to the     Fielding data frame. You'll have to group by player id, sum over the variable G, filter, and     then do some sort of join with the Master data frame.
+
+```{r Lahman}
+players <- group_by(Fielding, playerID)
+players <- mutate(players, G_sum = sum(G))
+players <- select(players, playerID, G_sum)
+
+players.full <- left_join(unique(players), Master)
+head(players.full)
+```
+
+b) Create a data frame similar to the babynames, but based on your data frame in (a). Use the       variables nameFirst and birthYear.
+```{r}
+players.full <- group_by(players.full, nameFirst, birthYear)
+babynames.new <- select(players.full, nameFirst, birthYear) 
+babynames.new <- arrange(babynames.new, nameFirst, birthYear)
+head(babynames.new)
+```
+
+c) Combine the babynames data frame, restricted to male babies, and the one that you 
+    created in (b). 
+    
+```{r babynames}
+babynames.male <- filter(babynames, sex == "M")
+babynames.male <- select(babynames.male, year, name, n, prop)
+babynames.combined <- full_join(babynames.new, babynames.male,
+                      by = c("nameFirst" = "name", "birthYear" = "year"))
+head(babynames.combined)
+```
+
+d) Determine the 5 most popular names for male babies from the babynames dataset and 
+   the 5 most popular names for baseball players, based on your dataset in (b).
+   Do this by pooling all the names from 1890 to 1990---that is, find 10 names total, not 10 
+   names per year. The total might actually be less than 10 if there is overlap in the names.
+ 
+```{r}
+babynames.m <- filter(babynames, year>= 1890 & year <= 1990, sex == "M")
+babynames.m <- select(babynames.m, name, n)
+babynames.m <- group_by(babynames.m, name)
+babynames.m <- mutate(babynames.m, sum = sum(n))
+babynames.m <- select(babynames.m, name, sum)
+babynames.m <- arrange(unique(babynames.m), desc(sum))
+head(babynames.m)
+
+babynames.n <- count(babynames.new)
+babynames.n <- group_by(babynames.n, nameFirst)
+babynames.n <- mutate(babynames.n, sum = sum(n))
+babynames.n <- group_by(babynames.n, nameFirst)
+babynames.n <- select(babynames.n, nameFirst, sum)
+babynames.n <- arrange(unique(babynames.n), desc(sum))
+head(babynames.n)
+```
+
+e) If you plot a name in the general population (i.e., from babynames) against baseball player     names, the difference in scale will make it hard to interpret. For both general population      and baseball names, create a new variables for each: the proportion of all names from that year equal to that name (e.g., if 2% of all babies in 1961 were names "Steven", this new        variable would equal 0.02 for Steven for 1961).
+
+```{r}
+babynames.d <- group_by(babynames, year)
+babynames.d <- filter(babynames.d, sex == "M")
+head(babynames.d)
+
+babynames.p <- count(babynames.new)
+babynames.p <- group_by(babynames.p, birthYear)
+babynames.p <- mutate(babynames.p, sum = sum(n))
+babynames.p <- mutate(babynames.p, prop = (n/sum))
+head(babynames.p)
+```
+
+f) For each of the names you determined in (d), plot the relative popularity, using the variable you created in (e). Each figure should have different colors for general population names and for baseball player names. The horizontal axis should be year of birth, from 1890 to 1990.
+
+
+```{r}
+###general names 
+ggplot(data = filter(babynames, sex == "M", year >=1890 & year <=1990,
+                                  name == "James" |
+                                  name == "John" |
+                                  name == "Robert" |
+                                  name =="Michael"|
+                                  name == "William")) + 
+                                  geom_point(aes(year,prop, colour = name))
+
+###baseball player names
+ggplot(data = filter(babynames.p, birthYear >=1890 & birthYear <=1990,
+                                  nameFirst == "Bill" |
+                                  nameFirst == "Joe" |
+                                  nameFirst == "John" |
+                                  nameFirst =="Mike"|
+                                  nameFirst == "Jim")) + 
+                                  geom_point(aes(birthYear,prop, colour = nameFirst))
+```
+
+## 2). Restaurant Inspection 
+
+* Starting with the restaurant health inspection dataset, create a new one that has 
+   a single observation for each inspection date. The observation should include all 
+   of the descriptive information about the restaurant, but from the many inspection- 
+   and violation-specific variables, please include only the mean score for that day. 
+   Now create a new data frame that for each restaurant (uniquely identifies by the 
+   CAMIS variable) has only the date and score of the most recent inspection. 
+   Please plot boxplots of scores for each boro (use "aes(BORO, SCORE)" and "geom_boxplot()").
+
+```{r restaurant.df}
+library(plyr)
+names(restaurant.df) <- make.names(names(restaurant.df))
+restaurant.df <- group_by(restaurant.df, INSPECTION.DATE, DBA)
+restaurant.df <- mutate(restaurant.df, mean = mean(SCORE))
+
+restaurant.sp <- select(restaurant.df, DBA, INSPECTION.DATE)
+restaurant.sp <- ddply(restaurant.sp,"DBA", summarise, INSPECTION.DATE = max(INSPECTION.DATE))
+comb <- inner_join(restaurant.sp, restaurant.df, by= c("DBA", "INSPECTION.DATE"))
+
+comb <- select(comb, DBA, INSPECTION.DATE, BORO, BUILDING,STREET, ZIPCODE, 
+               PHONE, CUISINE.DESCRIPTION, SCORE)
+comb <- unique(comb)
+
+ggplot(data= comb)+geom_boxplot(mapping = aes(BORO, SCORE))
+```
+
+
+## 3). Legally-Operating-Businesses 
+
+* The data at 
+    `https://nycopendata.socrata.com/Business/Legally-Operating-Businesses/w7w3-xahh `
+   (you'll have to figure out how to export it) does not include restaurants. Using 
+   the "Contact Phone Number", see if there are any businesses that share a phone number 
+   with restaurants in the dataset you created in (2). Because of formatting and other 
+   issues, you may not find every possible match; do not worry about that for now. For 
+   the matches that you find, use the functions sort and table to find the top ten 
+   business license categories where the business shares a phone number or address with a 
+   restaurant.
+```{r legal}
+names(legal) <- make.names(names(legal))
+comb<- group_by(comb, PHONE)
+match <- inner_join(comb, legal, by=c("PHONE" = "Contact.Phone.Number"))
+head(match)
+```
+   

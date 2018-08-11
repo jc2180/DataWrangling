@@ -1,0 +1,26 @@
+MSDS 597 Assignment
+Week 5B (there was also a 5A): 
+
+
+Homework to hand in (due October 24, 7am):
+Please submit a Rmarkdown file that runs on its own. 
+Be sure to include explanatory text of what you are doing---don't just show a lot of 
+R code and results. Use commands from the tidyverse, including pipes, when you can.
+
+Please use the following file name convention: 
+    Buyske_week_02.Rmd 
+(changing the last name and the week as appropriate, of course).
+Finally, please be sure that your Rmarkdown file has yourself as author and has 
+    output: html_document
+    
+3) Consider the following three websites,
+    Medal count from Rio Olympics
+        http://www.cbssports.com/olympics/news/2016-rio-olympics-medal-tracker/
+    Three letter contry codes:
+               https://en.wikipedia.org/wiki/List_of_IOC_country_codes
+        (Note: I originally posted the page http://www.nationsonline.org/oneworld/country_code_list.htm , but that has ISO codes, not IOC codes)
+    Populations of countries:
+        https://en.wikipedia.org/wiki/List_of_countries_by_population_(United_Nations)
+a) Please create a dataset with variables equal to the country name, the UN continental region, the population (2016), and the number of gold, silver, bronze, and total medals from the Rio Olympics. 
+b) Grouping by region, please fit a linear regression of total medals on population and create a small dataset with only the variables of region and the R^2 from the regression.
+c) Create a long (or tall) version of the dataset in (a) with a variable indicating the type of medal and a variable showing the number of medals for the country of that type.

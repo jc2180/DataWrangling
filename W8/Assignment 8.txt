@@ -1,0 +1,8 @@
+1. Write a set of functions to clean a column in the WHO data from last week. For example, use a modification (no need for commas in the output) of the clean_who_number_spaces() function from class, other functions to pull out the upper and lower bounds, and a function  that calls all of those functions in order to take as input a column in the WHO format and output a 3 column data frame. Name that last function "fix_who_column". Save the functions in a file named along the lines of "buyske-functions.R" (except use your last name, not mine) and save it in the code folder in your copy of the repo described below.
+
+2 Here are the details of the problem I described in class
+a. Clone the repo at https://github.com/buyske/msds597-week08.git (if there's only a README file and nothing else, though, wait before you clone it). 
+b. Pick a data category from http://apps.who.int/gho/data/node.main. Let others in the class know via an Issue to the repo. 
+c. Save the file to the data directory in your copy of the rep
+d. Add some code to the report.Rmd file to creates a data frame from the data that you chose. Be sure to clean it using your fix_who_column() function.
+e. Send a pull request to the original repo.

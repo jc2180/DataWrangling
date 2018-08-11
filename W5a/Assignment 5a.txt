@@ -1,0 +1,26 @@
+MSDS 597 Assignment
+Week 5A (there will be a 5B): 
+Read Kaplan Chapter 11 & 15 and Boehmke pp 132--146
+Read http://r4ds.had.co.nz/ Chapter 12
+Do the problems at the end of Kaplan Chapters 11 & 15.
+
+
+Homework to hand in (due October 24, 7am):
+Please submit a Rmarkdown file that runs on its own. 
+Be sure to include explanatory text of what you are doing---don't just show a lot of 
+R code and results. Use commands from the tidyverse, including pipes, when you can.
+
+Please use the following file name convention: 
+    Buyske_week_02.Rmd 
+(changing the last name and the week as appropriate, of course).
+Finally, please be sure that your Rmarkdown file has yourself as author and has 
+    output: html_document
+    
+1) Continuing the in-class assignment, take the electoral college table from the Wikipedia page on US presidential elections and create a tidy dataset. Each row should correspond to one election year and candidate, and the variables should be year, candidate, party, electoral votes, and whether or not the candidate won. Finally, use that tidy dataset to plot the electoral votes over time. That is, use year on the x-axis, electoral votes on the y-axis, and a dot for each candidate. Color the dots in some informative way.
+
+2) For this problem you will need to install the readxl package
+    a) Use ?read_excel to see how to use that function
+    b) Copy the file "UN_MigrantStockByOriginAndDestination_2015.xlsx" to your folder for the assignment (and write your RMarkdown with the assumption that this file is in the same folder as the Rmd file)
+    c) Use read_excel to load the sheet named "Table 16" into R. You'll need both the sheet and the skip options.
+    d) Convert the dataset to a tidy dataset, where the columns are origin, destination, and number of migrants. The dataset should have only countries, not regions or other categories
+    e) Determine the 10 pairs of countries with the largest migrant flow.

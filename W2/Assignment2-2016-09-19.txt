@@ -1,0 +1,57 @@
+MSDS 597 Assignment
+Week 2: 
+Read Boehmke 79--84, 100-108; 224--231; Read Kaplan Chapters 5, 6, & 8 (don't worry about
+using Kaplan's non-ggplot2 graphics commands.
+Do the Problems at the end of Kaplan Chapters 6 & 8 (don't hand in). 
+You'll need to install the mosaicData package.
+
+
+Homework to hand in (due 7 am on Monday):
+ Please submit a Rmarkdown file that runs on its own (you can assume 
+that "gapminder_2007_gini.tsv" is in the directory that RStudio is running from). 
+Be sure to include explanatory text of what you are doing---don't just show a lot of 
+R code and results. Use commands from the tidyverse, including pipes, when you can.
+
+Please use the following file name convention: 
+    Buyske_week_02.Rmd 
+(changing the last name and the week as appropriate, of course).
+
+
+
+In the following, please consider data frame and tibble to be interchangeable. 
+If you want to see all of a tibble, you can do so using 
+    print(example.tbl, width = Inf, n = Inf)
+
+
+
+
+(1) Create a data frame from the dataset 
+    https://nycopendata.socrata.com/api/views/xx67-kt59/rows.csv?accessType=DOWNLOAD
+which is in csv format. 
+Form a new data frame restricted to restaurants in Brooklyn with cuisine equal to 
+"Ice Cream, Gelato, Yogurt, Ices". 
+What are the 5 most common names (use the variable "DBA") in the data frame? 
+(Restaurants are repeatedly inspected, so this is not the same as the most common names of restaurants.) 
+What grades has Brooklyn ice cream store "SWEET EXPRESSIONS" received and how often? 
+(Use the table command)
+
+Note: you might find it a bit easier if you execute
+    names(restaurant) <- make.names(names(restaurant))
+(where restaurant is the name of the data frame)
+
+
+
+(2) The file "gapminder_2007_gini.tsv" is in the class Dropbox folder; it is a subset of 
+the 2007 Gapminder data merged with recent Gini coefficient data 
+( https://en.wikipedia.org/wiki/Gini_coefficient ). Please make an interesting plot.
+Please also generate a data frame showing, for each continent, the minimum, maximum, 
+and average Gini coefficient.
+
+
+
+(3) Using the original gapminder data frame, please generate a data frame with a new 
+variable called gdp by multipling the population size by the gdp per capita. 
+To make those large numbers more understandable, please form an additional new variable 
+called gdp_ratio equal to the gdp divided by the gdp of the United States in 2007.
+Find the mean gdp_ratio by continent and year, and then plot the mean gdp_ratio 
+over time, distinguishing the continents. Please use both points and lines for the plot.

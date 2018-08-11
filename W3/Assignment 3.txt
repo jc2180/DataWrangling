@@ -1,0 +1,59 @@
+MSDS 597 Assignment
+Week 3: 
+Read Kaplan Chapters 10 and 12
+Do the Problems at the end of Kaplan Chapters 10 and 12. 
+
+
+Homework to hand in (due 7 am on Monday):
+Please submit a Rmarkdown file that runs on its own. 
+Be sure to include explanatory text of what you are doing---don't just show a lot of 
+R code and results. Use commands from the tidyverse, including pipes, when you can.
+
+Please use the following file name convention: 
+    Buyske_week_02.Rmd 
+(changing the last name and the week as appropriate, of course).
+Finally, please be sure that your Rmarkdown file has yourself as author and has 
+    output: html_document
+    
+    
+1) We would like to visually compare first names of baseball players with those of 
+   male babies in the population at large. This will require several steps.
+a) Create a data frame of players who played at least 200 games in their career 
+   according to the Fielding data frame. You'll have to group by player id, sum 
+   over the variable G, filter, and then do some sort of join with the Master data frame.
+b) Create a data frame similar to the babynames, but based on your data frame in (a). 
+   Use the variables nameFirst and birthYear.
+c) Combine the babynames data frame, restricted to male babies, and the one that you 
+   created in (b). NOTE: I mistakenly placed the last sentence in (d) here earlier.
+d) Determine the 5 most popular names for male babies from the babynames dataset and 
+   the 5 most popular names for baseball players, based on your dataset in (b).
+   Do this by pooling all the names from 1890 to 1990---that is, find 10 names total, not 10 
+   names per year. The total might actually be less than 10 if there is overlap in the names.
+e) If you plot a name in the general population (i.e., from babynames) against baseball 
+   player names, the difference in scale will make it hard to interpret. For both 
+   general population and baseball names, create a new variables for each: the proportion 
+   of all names from that year equal to that name (e.g., if 2% of all babies in 1961 
+   were names "Steven", this new variable would equal 0.02 for Steven for 1961).
+f) For each of the names you determined in (d), plot the relative popularity, using 
+   the variable you created in (e). Each figure should have different colors for 
+   general population names and for baseball player names. The horizontal axis should 
+   be year of birth, from 1890 to 1990.
+
+
+
+2) Starting with the restaurant health inspection dataset, create a new one that has 
+   a single observation for each inspection date. The observation should include all 
+   of the descriptive information about the restaurant, but from the many inspection- 
+   and violation-specific variables, please include only the mean score for that day. 
+   Now create a new data frame that for each restaurant (uniquely identifies by the 
+   CAMIS variable) has only the date and score of the most recent inspection. 
+   Please plot boxplots of scores for each boro (use "aes(BORO, SCORE)" and "geom_boxplot()").
+
+3) The data at 
+        https://nycopendata.socrata.com/Business/Legally-Operating-Businesses/w7w3-xahh 
+   (you'll have to figure out how to export it) does not include restaurants. Using 
+   the "Contact Phone Number", see if there are any businesses that share a phone number 
+   with restaurants in the dataset you created in (2). Because of formatting and other           
+   issues, you may not find every possible match; do not worry about that for now. For 
+   the matches that you find, use the functions sort and table to find the top ten 
+   business license categories where the business shares a phone number or address with a restaurant.

@@ -1,0 +1,51 @@
+1. The diamonds dataset is often used to illustrate the ggplot2 package and can be loaded with data(diamonds). Please make a first plot of caret by price, colored by the variable color and using the variable cut to facet_wrap. Please touch up the plot by capitalizing the axes labels and the legend title and by giving an overall title. After that, please make a total of 6 versions of that same plot using different combinations of themes and color palettes. Your choice as to the combinations.
+
+2. The website https://www.theguardian.com/news/datablog/2012/nov/07/us-2012-election-county-results-download has county-level election results for the 2012 US Presidential election. Download the Excel file and then read that into R (in submitting your homework, you may assume that the file is already downloaded to the working directory). Please make the following maps:
+a The popular vote totals for Obama
+b The popular vote totals for Romney
+c The percentage of the 2-candidate vote for Obama
+
+For each of these, please produce a map with continuous colors and a map with binned colors (I suggest 9), and for each produce both a national and a NJ map (so you will have 3 x 2 x 2 maps). Feel free to use the default color scheme. Finally, take the binned NJ map in (c) and draw it with 2 additional color palettes.
+
+3. The weather history on October 17 for the closest (small) airport to Piscataway can be found at   https://www.wunderground.com/history/airport/KSMQ/2016/10/17/DailyHistory.html?req_city=Piscataway&req_state=NJ&req_statename=New+Jersey&reqdb.zip=08854&reqdb.magic=1&reqdb.wmo=99999
+   Download (and clean) the table at the bottom of the page, using html_node("#obsTable"), not html_node("table"). Please plot the time of day against temperature and dew point for the day (I suggest using a line and points for each, and separate colors for the temp/dew point).
+
+===============================================
+
+ggplot(aes(x = gdpPercap, y = lifeExp, fill = country))
+scale_fill_manual(values = country_colors)
+
+guide_legend(title="my awesome title")
+
+
+fill = country
+
+scale_fill_manual(values = country_colors) +
+
+
+scale_x_log10(limits = c(230, 63000))
+
+
+limits = c(0.2, 1)
+
+ggplot(aes(x = gdpPercap, y = lifeExp, fill = country))
+scale_fill_manual(values = country_colors) +
+
+
+
+
+num_colors = 1) 
+# the num_colors = 1 option uses a continuous color palette
+
+df_county_demographics %>% dplyr::rename(value = percent_asian) %>%
+  county_choropleth(title = "Asian Percentage of Population", num_colors = 1)
+
+ggplot(df_county_demographics, aes(percent_asian)) + geom_histogram(binwidth = 1)
+
+
+df_county_demographics %>% dplyr::rename(value = percent_asian) %>%
+  county_choropleth(title = "Asian Percentage of Population", num_colors = 9)
+
+df_county_demographics %>% dplyr::rename(value = percent_asian) %>%
+  county_choropleth(title = "Asian Percentage of Population", 
+                    num_colors = 9, state_zoom = "new jersey")
